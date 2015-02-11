@@ -10,15 +10,16 @@ object Main extends App {
     import java.net.InetSocketAddress
     import akka.actor.ActorSystem
     import ipfix.ie.DefaultIEMap
-    import ipfix.actors.{StoragePool, Server}
+    import ipfix.actors.{FlowHandlerPool, Storage, Server}
 
     implicit val system = ActorSystem("ipfix")
 
     val connStr = "jdbc:postgresql://postgres:5432/test?user=test&password=test"
     val address = new InetSocketAddress("172.16.1.146", 2055)
 
-    val storage = system.actorOf(StoragePool(4, "org.postgresql.Driver", connStr, DefaultIEMap), "storage")
-    val flowRouter = system.actorOf(FlowRouter(List(storage)), "flowRouter")
+    val storage = Storage("org.postgresql.Driver", connStr, DefaultIEMap)
+    val storagePool = system.actorOf(FlowHandlerPool(4, storage), "storage")
+    val flowRouter = system.actorOf(FlowRouter(List(storagePool)), "flowRouter")
     system.actorOf(Server(address, flowRouter, DefaultIEMap), "server")
   }
 
