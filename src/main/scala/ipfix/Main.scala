@@ -1,5 +1,7 @@
 package ipfix
 
+import ipfix.actors.FlowRouter
+
 object Main extends App {
 //  ieGen()
   runSystem()
@@ -16,7 +18,8 @@ object Main extends App {
     val address = new InetSocketAddress("172.16.1.146", 2055)
 
     val storage = system.actorOf(StoragePool(4, "org.postgresql.Driver", connStr, DefaultIEMap), "storage")
-    system.actorOf(Server(address, storage, DefaultIEMap), "server")
+    val flowRouter = system.actorOf(FlowRouter(List(storage)), "flowRouter")
+    system.actorOf(Server(address, flowRouter, DefaultIEMap), "server")
   }
 
   def ieGen(): Unit = {

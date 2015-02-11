@@ -7,7 +7,7 @@ import akka.io.Tcp.{Bind, Bound, CommandFailed, Connected}
 import akka.io.{IO, Tcp}
 import ipfix.ie.IEMap
 
-class Server(address: InetSocketAddress, storage: ActorRef, iEMap: IEMap) extends BaseActor {
+class Server(address: InetSocketAddress, flowHandler: ActorRef, iEMap: IEMap) extends BaseActor {
   bind()
 
   def receive = binding
@@ -30,10 +30,10 @@ class Server(address: InetSocketAddress, storage: ActorRef, iEMap: IEMap) extend
   def bind(): Unit = IO(Tcp) ! Bind(self, address)
 
   def handle(conn: ActorRef, info: Connected): Unit = {
-    context.actorOf(Receiver(conn, storage, iEMap), "receiver-" + info.remoteAddress.toString.tail)
+    context.actorOf(Receiver(conn, flowHandler, iEMap), "receiver-" + info.remoteAddress.toString.tail)
   }
 }
 
 object Server {
-  def apply(addr: InetSocketAddress, storage: ActorRef, iEMap: IEMap): Props = Props(new Server(addr, storage, iEMap))
+  def apply(addr: InetSocketAddress, flowHandler: ActorRef, iEMap: IEMap): Props = Props(new Server(addr, flowHandler, iEMap))
 }

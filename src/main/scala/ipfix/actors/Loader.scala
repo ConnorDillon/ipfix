@@ -5,7 +5,7 @@ import ipfix.ByteIterCounter
 import ipfix.ie.IEMap
 import ipfix.protocol._
 
-class Loader(storage: ActorRef, ieMap: IEMap) extends BaseActor {
+class Loader(flowHandler: ActorRef, ieMap: IEMap) extends BaseActor {
   val templates = collection.mutable.Map[Int, Template]()
 
   def receive = {
@@ -22,7 +22,7 @@ class Loader(storage: ActorRef, ieMap: IEMap) extends BaseActor {
           case x if x > 255 =>
             templates.get(x) match {
               case Some(template) =>
-                storage ! FlowSet(template, loadSet(template.minDataRecordSize, loadFlow(template), byteIter))
+                flowHandler ! FlowSet(template, loadSet(template.minDataRecordSize, loadFlow(template), byteIter))
               case None =>
                 3 to length foreach { _ => byteIter.next() }
             }
@@ -39,7 +39,7 @@ class Loader(storage: ActorRef, ieMap: IEMap) extends BaseActor {
     }
     while (byteIter.count < length) {
       log.debug(s"clear padding: byteIter.count: ${byteIter.count} < length: $length")
-      byteIter.next() // clear padding
+      byteIter.next()
     }
     records.toList
   }
@@ -98,5 +98,5 @@ class Loader(storage: ActorRef, ieMap: IEMap) extends BaseActor {
 }
 
 object Loader {
-  def apply(storage: ActorRef, ieMap: IEMap): Props = Props(new Loader(storage, ieMap))
+  def apply(flowHandler: ActorRef, ieMap: IEMap): Props = Props(new Loader(flowHandler, ieMap))
 }

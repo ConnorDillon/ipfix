@@ -7,8 +7,8 @@ import ipfix.ByteIterCounter
 import ipfix.ie.IEMap
 import ipfix.protocol.Message
 
-class Receiver(conn: ActorRef, storage: ActorRef, ieMap: IEMap) extends BaseActor {
-  val loader = context.actorOf(Loader(storage, ieMap), "loader")
+class Receiver(conn: ActorRef, flowHandler: ActorRef, ieMap: IEMap) extends BaseActor {
+  val loader = context.actorOf(Loader(flowHandler, ieMap), "loader")
 
   var partialMessage = ByteString()
 
@@ -58,5 +58,5 @@ class Receiver(conn: ActorRef, storage: ActorRef, ieMap: IEMap) extends BaseActo
 }
 
 object Receiver {
-  def apply(conn: ActorRef, storage: ActorRef, ieMap: IEMap): Props = Props(new Receiver(conn, storage, ieMap))
+  def apply(conn: ActorRef, flowHandler: ActorRef, ieMap: IEMap): Props = Props(new Receiver(conn, flowHandler, ieMap))
 }
