@@ -1,26 +1,24 @@
 package ipfix.actors
 
-import akka.actor.{ActorRef, Props, Terminated}
-import akka.routing.{ActorRefRoutee, RoundRobinRoutingLogic, Router}
+import akka.actor.{Props, Terminated}
+import akka.routing.{RoundRobinRoutingLogic, Router}
 import ipfix.ie.IEMap
 import ipfix.protocol.FlowSet
 
-class StoragePool(poolSize: Int, dbDriver: String, connStr: String, ieMap: IEMap) extends BaseActor {
-  var router = Router(RoundRobinRoutingLogic(), Vector.fill(poolSize)(ActorRefRoutee(getRoutee)))
+class StoragePool(poolSize: Int, dbDriver: String, connStr: String, ieMap: IEMap) extends BaseRouter {
+  var router = Router(RoundRobinRoutingLogic())
+  
+  1 to poolSize foreach(_ => addRoutee())
 
   def receive = {
-    case x: FlowSet =>
-      router.route(x, sender())
+    case f: FlowSet =>
+      router.route(f, sender())
     case Terminated(a) =>
-      router = router.removeRoutee(a)
-      router = router.addRoutee(getRoutee)
+      remRoutee(a)
+      addRoutee()
   }
 
-  def getRoutee: ActorRef = {
-    val routee = context.actorOf(Storage(dbDriver, connStr, ieMap))
-    context watch routee
-    routee
-  }
+  def addRoutee(): Unit = addRoutee(context.actorOf(Storage(dbDriver, connStr, ieMap)))
 }
 
 object StoragePool {
