@@ -5,14 +5,12 @@ import akka.actor.Props
 import ipfix.ie.IEMap
 import ipfix.protocol._
 
-class Storage(dbDriver: String, connStr: String, ieMap: IEMap) extends BaseActor {
+class Storage(dbDriver: String, connStr: String, ieMap: IEMap) extends BaseFlowHandler {
   Class.forName(dbDriver)
   val conn = DriverManager.getConnection(connStr)
   conn.setAutoCommit(true)
 
-  def receive = {
-    case FlowSet(template, flows) => insert(prepareInsert(template), flows)
-  }
+  def handle(flows: FlowSet) =  insert(prepareInsert(flows.template), flows.flows)
 
   def prepareInsert(template: Template): PreparedStatement = {
     val ies = template.fields.map(x => ieMap.ieByID(x.id))
