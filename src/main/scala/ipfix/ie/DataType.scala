@@ -3,7 +3,6 @@ package ipfix.ie
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.sql.Timestamp
-
 import ipfix.ByteIterCounter
 import ipfix.ie.DataType._
 

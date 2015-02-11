@@ -1,7 +1,6 @@
 package ipfix.actors
 
 import java.net.InetSocketAddress
-
 import akka.actor.{ActorRef, Props}
 import akka.io.Tcp.{Bind, Bound, CommandFailed, Connected}
 import akka.io.{IO, Tcp}

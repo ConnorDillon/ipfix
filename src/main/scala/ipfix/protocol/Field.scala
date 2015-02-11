@@ -2,7 +2,6 @@ package ipfix.protocol
 
 import java.net.InetAddress
 import java.sql.{PreparedStatement, Timestamp}
-
 import ipfix.ie.IE
 
 sealed trait Field {

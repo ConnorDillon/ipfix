@@ -1,7 +1,6 @@
 package ipfix.actors
 
 import java.sql.{DriverManager, PreparedStatement}
-
 import akka.actor.Props
 import ipfix.ie.IEMap
 import ipfix.protocol._
